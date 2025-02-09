@@ -26,6 +26,11 @@ jobs:
         with:
           version: 'latest'
 
+      - name: Install kubelogin
+        run: |
+          sudo az aks install-cli
+          sudo apt-get update && sudo apt-get install -y kubelogin
+          
       - name: Get AKS credentials
         run: az aks get-credentials --resource-group Erez1-Candidate --name aks-cluster
 
