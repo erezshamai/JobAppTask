@@ -20,3 +20,14 @@ jobs:
           echo ${{ secrets.ACR_PASSWORD }} | docker login erezcontainerregistry.azurecr.io -u ${{ secrets.ACR_USERNAME }} --password-stdin
           docker build -t erezcontainerregistry.azurecr.io/webapp:latest -f docker/Dockerfile .          
           docker push erezcontainerregistry.azurecr.io/webapp:latest
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v1
+        with:
+          version: 'latest'
+
+      - name: Get AKS credentials
+        run: az aks get-credentials --resource-group Erez1-Candidate --name aks-cluster
+
+      - name: Deploy to AKS
+        run: kubectl apply -f k8s/deployment.yaml -f k8s/service.yaml
