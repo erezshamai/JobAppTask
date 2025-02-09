@@ -30,8 +30,8 @@ jobs:
         run: |
           curl -LO https://github.com/Azure/kubelogin/releases/download/v0.0.25/kubelogin-linux-amd64.zip
           unzip kubelogin-linux-amd64.zip
-          sudo mv kubelogin /usr/local/bin/
-                    
+          sudo mv bin/linux_amd64/kubelogin /usr/local/bin/
+
       - name: Get AKS credentials
         run: az aks get-credentials --resource-group Erez1-Candidate --name aks-cluster
 
