@@ -13,10 +13,8 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          auth-type: IDENTITY
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Build Docker Image
         run: |
           docker build -t youracr.azurecr.io/webapp:latest .
