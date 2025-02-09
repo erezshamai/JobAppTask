@@ -32,8 +32,12 @@ jobs:
           unzip kubelogin-linux-amd64.zip
           sudo mv bin/linux_amd64/kubelogin /usr/local/bin/
 
+      - name: Configure Azure CLI to use service principal
+        run: |
+          az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+
       - name: Get AKS credentials
         run: az aks get-credentials --resource-group Erez1-Candidate --name aks-cluster
 
       - name: Deploy to AKS
-        run: kubectl apply --validate=false -f k8s/deployment.yaml -f k8s/service.yaml
+        run: kubectl apply  -f k8s/deployment.yaml -f k8s/service.yaml
