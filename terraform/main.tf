@@ -2,6 +2,101 @@ provider "azurerm" {
   features {}
   subscription_id = "2fa0e512-f70e-430f-9186-1b06543a848e"
 }
+# Strat Create an Application Gateway
+resource "azurerm_public_ip" "appgw_public_ip" {
+  name                = "appgw-public-ip"
+  location            = azurerm_resource_group.devops.location
+  resource_group_name = azurerm_resource_group.devops.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+}
+
+resource "azurerm_application_gateway" "appgw" {
+  name                = "appgw"
+  location            = azurerm_resource_group.devops.location
+  resource_group_name = azurerm_resource_group.devops.name
+
+  sku {
+    name     = "Standard_v2"
+    tier     = "Standard_v2"
+    capacity = 2
+  }
+
+  gateway_ip_configuration {
+    name      = "appgw-ip-config"
+    subnet_id = azurerm_subnet.appgw_subnet.id
+  }
+
+  frontend_ip_configuration {
+    name                 = "appgw-frontend-ip"
+    public_ip_address_id = azurerm_public_ip.appgw_public_ip.id
+  }
+
+  frontend_port {
+    name = "http-port"
+    port = 80
+  }
+
+  backend_address_pool {
+    name = "appgw-backend-pool"
+  }
+
+  http_listener {
+    name                           = "appgw-http-listener"
+    frontend_ip_configuration_name = "appgw-frontend-ip"
+    frontend_port_name             = "http-port"
+    protocol                       = "Http"
+  }
+
+  request_routing_rule {
+    name                       = "appgw-routing-rule"
+    rule_type                  = "Basic"
+    http_listener_name         = "appgw-http-listener"
+    backend_address_pool_name  = "appgw-backend-pool"
+    backend_http_settings_name = "appgw-http-settings"
+    priority                   = 100
+  }
+
+  backend_http_settings {
+    name                  = "appgw-http-settings"
+    cookie_based_affinity = "Disabled"
+    port                  = 80
+    protocol              = "Http"
+    request_timeout       = 20
+  }
+}
+# END Create an Application Gateway
+
+### Add a Network Security Group Rule
+resource "azurerm_network_security_rule" "appgw_inbound" {
+  name                        = "appgw-inbound"
+  priority                    = 100
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_ranges     = ["65200-65535"]
+  source_address_prefix       = "*"
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.devops.name
+  network_security_group_name = azurerm_network_security_group.nsg.name
+}
+
+
+# Start Configure DNS
+resource "azurerm_dns_zone" "erez1candidateexample" {
+  name                = "erez1candidateexample.com"
+  resource_group_name = azurerm_resource_group.devops.name
+}
+
+resource "azurerm_dns_a_record" "app" {
+  name                = "app"
+  zone_name           = azurerm_dns_zone.erez1candidateexample.name
+  resource_group_name = azurerm_resource_group.devops.name
+  ttl                 = 300
+  records             = [azurerm_public_ip.appgw_public_ip.ip_address]
+}
+# END Configure DNS
 
 resource "azurerm_resource_group" "devops" {
   name     = "Erez1-Candidate"
@@ -31,6 +126,14 @@ resource "azurerm_subnet" "aks_subnet" {
   resource_group_name  = azurerm_resource_group.devops.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.1.0/24"]
+}
+
+# Create dedicated subnet for Application Gateway
+resource "azurerm_subnet" "appgw_subnet" {
+  name                 = "appgw-subnet"
+  resource_group_name  = azurerm_resource_group.devops.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.2.0/24"]
 }
 
 #associate a Network Security Group (NSG) with the subnet
@@ -120,6 +223,13 @@ resource "azurerm_kubernetes_cluster" "aks" {
     service_cidr   = "10.1.0.0/16"
     dns_service_ip = "10.1.0.10"
   }
+
+#  addon_profile {
+#    ingress_application_gateway {
+#      enabled = true
+#      gateway_id = azurerm_application_gateway.appgw.id
+#    }
+#  }
 
   api_server_access_profile {
     authorized_ip_ranges = ["203.0.113.0/24"]
