@@ -2,6 +2,37 @@ provider "azurerm" {
   features {}
   subscription_id = "2fa0e512-f70e-430f-9186-1b06543a848e"
 }
+# Define Custom Role for Azure Monitor Log Reading
+resource "azurerm_role_definition" "monitor_log_reader" {
+  name        = "Custom Azure Monitor Log Reader"
+  scope       = "/subscriptions/${var.subscription_id}"
+  description = "Custom role to allow reading logs from Azure Monitor"
+
+  permissions {
+    actions = [
+      "Microsoft.Insights/eventtypes/values/read",
+      "Microsoft.OperationalInsights/workspaces/query/read",
+      "Microsoft.OperationalInsights/workspaces/read",
+      "Microsoft.OperationalInsights/workspaces/sharedKeys/read",
+      "Microsoft.OperationalInsights/workspaces/listKeys/action",
+      "Microsoft.OperationalInsights/workspaces/tables/read"
+    ]
+    not_actions = []
+  }
+
+  assignable_scopes = [
+    "/subscriptions/${var.subscription_id}"
+  ]
+}
+
+# Assign Custom Role to User or Group
+resource "azurerm_role_assignment" "assign_monitor_log_reader" {
+  scope                = "/subscriptions/${var.subscription_id}"
+  role_definition_name = azurerm_role_definition.monitor_log_reader.name
+  principal_id         = var.user_or_group_id  # Object ID of the user or group
+}
+
+
 # Strat Create an Application Gateway
 resource "azurerm_public_ip" "appgw_public_ip" {
   name                = "appgw-public-ip"
