@@ -40,5 +40,5 @@ jobs:
 
       - name: Get AKS credentials and Deploy to AKS
         run: |
-          az aks get-credentials --resource-group Erez1-Candidate --name aks-cluster
+          az aks get-credentials --resource-group Erez1-Candidate --name aks-cluster --admin
           kubectl apply -f k8s/deployment.yaml -f k8s/service.yaml
