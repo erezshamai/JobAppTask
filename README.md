@@ -26,3 +26,6 @@ JOBAPPTASK/
  - following needed gitHub Repository secrets created: ACR_PASSWORD, ACR_USERNAME, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AZURE_CREDENTIALS, AZURE_TENANT_ID
  
  - After every repo push build and deploy pipeline will start automaticly runnig .github/workflows/main.yml file commands
+ - run az aks update --name aks-cluster --resource-group Erez1-Candidate --attach-acr erezcontainerregistry
+   to fix 
+   erezcontainerregistry.azurecr.io/webapp:latest": failed to authorize: failed to fetch anonymous token 
