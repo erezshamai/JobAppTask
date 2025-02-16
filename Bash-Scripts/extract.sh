@@ -67,7 +67,10 @@ process() {
     local target="$1"
     $verbose && echo "Processing: $target"
     if [[ -d "$target" && "$recursive" == true ]]; then
-        find "$target" -type f | while read -r file; do extract_file "$file"; done  # Recursively extract files
+        #find "$target" -type f -exec bash -c 'extract_file "$0"' {} \; # Recursively extract files
+        while IFS= read -r file; do
+            extract_file "$file"
+        done < <(find "$target" -type f)        
     elif [[ -f "$target" ]]; then
         extract_file "$target"  # Extract single file
     else
@@ -78,7 +81,12 @@ process() {
 
 # Loop through input arguments
 for arg in "$@"; do
-    process "$arg"
+    if [[ -e "$arg" ]]; then  # Check if the file exists before processing
+        process "$arg"
+    else
+        ((not_extracted++))
+        $verbose && echo "Skipping: '$arg' (not found or invalid filename)"
+    fi
 done
 
 # Display summary if verbose is enabled
