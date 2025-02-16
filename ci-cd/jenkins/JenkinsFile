@@ -1,0 +1,42 @@
+// Load Groovy Shared Library
+@Library('shared-library') _
+
+pipeline {
+    agent any
+
+    triggers {
+        pollSCM('* * * * *') // Poll every minute (for testing)
+    }
+
+    stages {
+        stage('SCM Checkout') {
+            steps {
+                script {
+                    def scmVars = checkout([$class: 'GitSCM',
+                        branches: [[name: '*/main']], // Change to your branch name
+                        userRemoteConfigs: [[url: 'https://github.com/erezshamai/JobAppTask.git']]])
+                    prepareEnv(scmVars)
+                }
+            }
+        }
+
+        stage('Build Artifact') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+
+        stage('Package Artifact') {
+            steps {
+                sh 'tar -czf app.tar.gz target/*.jar'
+            }
+        }
+
+        stage('Upload to Repository') {
+            steps {
+                sh 'curl -u user:password -T app.tar.gz http://your-repo.com/repository/'
+            }
+        }
+    }
+}
+
