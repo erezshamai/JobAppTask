@@ -33,7 +33,7 @@ pipeline {
 
         stage('Package Artifact') {
             steps {                
-                sh 'tar -czf app.tar.gz main.py requirements.txt app.log venv' // Package Python app and virtual environment
+                sh 'tar -czf app.tar.gz app/main.py requirements.txt app.log venv' // Package Python app and virtual environment
             }
         }
 
