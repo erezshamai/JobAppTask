@@ -44,7 +44,7 @@ pipeline {
                 withCredentials([string(credentialsId: 'jenkinsJobAppTask_cred', variable: 'Secret')]) {
                     sh '''
                     git config --global user.email "erezsh12@gmail.com"
-                    git config --global user.name "Erez Shamai"
+                    git config --global user.name "erezshamai"
 
                     # Create a new tag if it doesn’t exist
                     TAG="v1.0.0"
