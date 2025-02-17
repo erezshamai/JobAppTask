@@ -43,19 +43,22 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'jenkinsJobAppTask_cred', variable: 'Secret')]) {
                     sh '''
-                    # Ensure `jq` is installed for JSON parsing
-                    #apt update && apt install -y jq  
-                    
-                    #git config --global user.email "erezsh12@gmail.com"
-                    #git config --global user.name "erezshamai"
+                    # Ensure SSH directory and correct permissions
+                    mkdir -p /var/jenkins_home/.ssh
+                    chmod 700 /var/jenkins_home/.ssh
+                    chmod 600 /var/jenkins_home/.ssh/id_rsa
+
+                    # Configure Git user
+                    git config --global user.email "erezsh12@gmail.com"
+                    git config --global user.name "erezshamai"
 
                     # Change GitHub remote to SSH
-                    #git remote set-url origin git@github.com:erezshamai/JobAppTask.git
+                    git remote set-url origin git@github.com:erezshamai/JobAppTask.git
 
                     # Create a new tag if it doesn’t exist
                     TAG="v1.0.0"
-                    #git tag -l "$TAG" | grep "$TAG" || git tag -a "$TAG" -m "Automated release $TAG"
-                    #GIT_SSH_COMMAND="ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" git push origin "$TAG"
+                    git tag -l "$TAG" | grep "$TAG" || git tag -a "$TAG" -m "Automated release $TAG"
+                    GIT_SSH_COMMAND="ssh -i /var/jenkins_home/.ssh/id_rsa -o StrictHostKeyChecking=no" git push origin "$TAG"
 
                     # Create GitHub release
                     RESPONSE=$(curl -X POST -H "Authorization: Bearer $Secret" \
