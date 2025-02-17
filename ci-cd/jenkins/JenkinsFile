@@ -43,13 +43,13 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'jenkinsJobAppTask_cred', variable: 'Secret')]) {
                     sh '''
-                    git config --global user.email "erezsh12@gmail.com"
-                    git config --global user.name "erezshamai"
+                    #git config --global user.email "erezsh12@gmail.com"
+                    #git config --global user.name "erezshamai"
 
                     # Create a new tag if it doesn’t exist
                     TAG="v1.0.0"
-                    git tag -l "$TAG" | grep "$TAG" || git tag -a "$TAG" -m "Automated release $TAG"
-                    git push origin "$TAG"
+                    #git tag -l "$TAG" | grep "$TAG" || git tag -a "$TAG" -m "Automated release $TAG"
+                    #git push origin "$TAG"
 
                     # Create GitHub release
                     RESPONSE=$(curl -X POST -H "Authorization: token $Secret" \
