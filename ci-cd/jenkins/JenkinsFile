@@ -45,29 +45,28 @@ pipeline {
                     sh '''
                     git config --global user.email "erezsh12@gmail.com"
                     git config --global user.name "Erez Shamai"
+
                     # Create a new tag if it doesn’t exist
                     TAG="v1.0.0"
                     git tag -l "$TAG" | grep "$TAG" || git tag -a "$TAG" -m "Automated release $TAG"
                     git push origin "$TAG"
 
                     # Create GitHub release
-                    curl -X POST -H "Authorization: token $TOKEN" \
+                    RESPONSE=$(curl -X POST -H "Authorization: token $Secret" \
                     -H "Accept: application/vnd.github.v3+json" \
-                    https://github.com/erezshamai/JobAppTask/releases \
                     -d '{
                         "tag_name": "'$TAG'",
                         "name": "'$TAG'",
                         "body": "Automated release by Jenkins",
                         "draft": false,
                         "prerelease": false
-                    }'
+                    }' https://api.github.com/repos/erezshamai/JobAppTask/releases)
+
+                    # Extract the upload URL from the response
+                    UPLOAD_URL=$(echo "$RESPONSE" | jq -r ".upload_url" | sed "s/{?name,label}//")
 
                     # Upload `app.tar.gz` to the release
-                    UPLOAD_URL=$(curl -s -H "Authorization: token $TOKEN" \
-                    https://github.com/erezshamai/JobAppTask/releases/latest | \
-                    jq -r ".upload_url" | sed "s/{?name,label}//")
-
-                    curl -X POST -H "Authorization: token $TOKEN" \
+                    curl -X POST -H "Authorization: token $Secret" \
                     -H "Content-Type: application/octet-stream" \
                     --data-binary @app.tar.gz \
                     "$UPLOAD_URL?name=app.tar.gz"
