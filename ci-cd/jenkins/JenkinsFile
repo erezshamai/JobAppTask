@@ -23,9 +23,10 @@ pipeline {
         stage('Build Artifact') {
             steps {
                 sh '''
-                apt update && apt install -y python3-venv
-                python3 -m venv venv
-                source venv/bin/activate
+                apt update && apt install -y python3 python3-venv  # Ensure Python3 and venv are installed
+                python3 -m venv venv  # Create virtual environment
+                if [ ! -d "venv" ]; then echo "Error: venv not created!" && exit 1; fi  # Check if venv was created
+                . venv/bin/activate  # Activate virtual environment
                 pip install --upgrade pip
                 pip install -r requirements.txt
                 '''
@@ -34,7 +35,7 @@ pipeline {
 
         stage('Package Artifact') {
             steps {                
-                sh 'tar -czf app.tar.gz app/main.py requirements.txt app.log venv' // Package Python app and virtual environment
+                sh 'tar -czf app.tar.gz app/main.py requirements.txt venv' // Package Python app and virtual environment
             }
         }
 
