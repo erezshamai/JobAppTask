@@ -5,6 +5,7 @@ wsl --list --verbose
 wsl -d Ubuntu --user root
 su erez
 
+pollSCMTest1
 
 prerequisite using extract.sh :
 - make sure all needed linux application/packs are unstalled (like zip/unzip)
