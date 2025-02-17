@@ -41,7 +41,38 @@ pipeline {
 
         stage('Upload to Repository') {
             steps {
-                sh 'curl -u user:password -T app.tar.gz http://your-repo.com/repository/'
+                withCredentials([string(credentialsId: 'jenkinsJobAppTask_cred', variable: 'Secret')]) {
+                    sh '''
+                    git config --global user.email "erezsh12@gmail.com"
+                    git config --global user.name "Erez Shamai"
+                    # Create a new tag if it doesn’t exist
+                    TAG="v1.0.0"
+                    git tag -l "$TAG" | grep "$TAG" || git tag -a "$TAG" -m "Automated release $TAG"
+                    git push origin "$TAG"
+
+                    # Create GitHub release
+                    curl -X POST -H "Authorization: token $TOKEN" \
+                    -H "Accept: application/vnd.github.v3+json" \
+                    https://github.com/erezshamai/JobAppTask/releases \
+                    -d '{
+                        "tag_name": "'$TAG'",
+                        "name": "'$TAG'",
+                        "body": "Automated release by Jenkins",
+                        "draft": false,
+                        "prerelease": false
+                    }'
+
+                    # Upload `app.tar.gz` to the release
+                    UPLOAD_URL=$(curl -s -H "Authorization: token $TOKEN" \
+                    https://github.com/erezshamai/JobAppTask/releases/latest | \
+                    jq -r ".upload_url" | sed "s/{?name,label}//")
+
+                    curl -X POST -H "Authorization: token $TOKEN" \
+                    -H "Content-Type: application/octet-stream" \
+                    --data-binary @app.tar.gz \
+                    "$UPLOAD_URL?name=app.tar.gz"
+                    '''
+                }
             }
         }
     }
