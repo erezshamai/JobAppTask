@@ -43,13 +43,18 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'jenkinsJobAppTask_cred', variable: 'Secret')]) {
                     sh '''
-                    #git config --global user.email "erezsh12@gmail.com"
-                    #git config --global user.name "erezshamai"
+                    #apt update && apt install -y jq  # Ensure jq is installed
+                    
+                    git config --global user.email "erezsh12@gmail.com"
+                    git config --global user.name "Erez Shamai"
+
+                    # Change GitHub remote to SSH
+                    git remote set-url origin git@github.com:erezshamai/JobAppTask.git
 
                     # Create a new tag if it doesn’t exist
                     TAG="v1.0.0"
-                    #git tag -l "$TAG" | grep "$TAG" || git tag -a "$TAG" -m "Automated release $TAG"
-                    #git push origin "$TAG"
+                    git tag -l "$TAG" | grep "$TAG" || git tag -a "$TAG" -m "Automated release $TAG"
+                    GIT_SSH_COMMAND="ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" git push origin "$TAG"
 
                     # Create GitHub release
                     RESPONSE=$(curl -X POST -H "Authorization: token $Secret" \
@@ -64,6 +69,12 @@ pipeline {
 
                     # Extract the upload URL from the response
                     UPLOAD_URL=$(echo "$RESPONSE" | jq -r ".upload_url" | sed "s/{?name,label}//")
+
+                    if [[ -z "$UPLOAD_URL" ]]; then
+                        echo "Failed to extract UPLOAD_URL. API response:"
+                        echo "$RESPONSE"
+                        exit 1
+                    fi
 
                     # Upload `app.tar.gz` to the release
                     curl -X POST -H "Authorization: token $Secret" \
