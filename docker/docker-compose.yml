@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  web:
+    build: ./web
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    environment:
+      - FLASK_ENV=development
+      - DB_HOST=db
+      - DB_PORT=6379
+    restart: always
+
+  db:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    restart: always
