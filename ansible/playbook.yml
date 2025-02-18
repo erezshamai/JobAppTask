@@ -1,4 +1,4 @@
-
+---
 - name: Deploy Docker Compose Application
   hosts: all
   become: true
@@ -25,12 +25,12 @@
 
     - name: Copy Docker Compose file
       copy:
-        src: docker-compose.yml
+        src: docker/docker-compose.yml  
         dest: /home/ubuntu/docker-app/docker-compose.yml
 
     - name: Copy Flask app files
       copy:
-        src: web/
+        src: docker/web/ 
         dest: /home/ubuntu/docker-app/web/
 
     - name: Deploy application using Docker Compose
