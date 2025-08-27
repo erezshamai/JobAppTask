@@ -11,4 +11,8 @@ RUN apt-get update && \
     apt-get install -y docker-ce docker-ce-cli containerd.io && \
     usermod -aG docker jenkins
 
+# Ensure the jenkins user owns its home directory
+# This is the crucial step to fix permission issues with volume mounts
+RUN chown -R jenkins:jenkins /var/jenkins_home
+
 USER jenkins
