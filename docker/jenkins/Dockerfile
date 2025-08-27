@@ -12,7 +12,6 @@ RUN apt-get update && \
     usermod -aG docker jenkins
 
 # Ensure the jenkins user owns its home directory and has read/write permissions
-RUN chown -R jenkins:jenkins /var/jenkins_home && \
-    chmod -R u+rw /var/jenkins_home
+RUN chown -R jenkins:jenkins /var/jenkins_home     
 
 USER jenkins
