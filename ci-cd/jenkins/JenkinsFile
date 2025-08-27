@@ -24,7 +24,7 @@ pipeline {
                 echo 'Building Docker image...'
                 // Assumes a 'Dockerfile' is in the root of the repository.
                 // The '. .' at the end specifies the Docker build context.
-                sh "docker build -t ${IMAGE_NAME}:latest ."
+                sh "docker build -t ${IMAGE_NAME}:latest -f docker/web/Dockerfile ."
             }
         }
 
