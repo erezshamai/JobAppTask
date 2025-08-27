@@ -1,95 +1,31 @@
-// Load Groovy Shared Library
-@Library('pipeline-library') _
-
 pipeline {
     agent any
 
-    triggers {
-        pollSCM('* * * * *') // Poll every minute (for testing)
+    environment {
+        DOCKER_HUB_CREDENTIALS = credentials('my-dockerhub-credentials-id')
+        IMAGE_NAME = 'erezshamai707/my-web-app'
     }
 
     stages {
         stage('SCM Checkout') {
             steps {
                 script {
-                    def scmVars = checkout([$class: 'GitSCM',
-                        branches: [[name: '*/main']], // Change to your branch name
+                    checkout([$class: 'GitSCM',
+                        branches: [[name: '*/aviram']],
                         userRemoteConfigs: [[url: 'https://github.com/erezshamai/JobAppTask.git']]])
-                    prepareEnv(scmVars)
                 }
             }
         }
 
-        stage('Build Artifact') {
+        stage('Build Docker Image') {
             steps {
-                sh '''
-                apt update && apt install -y python3 python3-venv  # Ensure Python3 and venv are installed
-                python3 -m venv venv  # Create virtual environment
-                if [ ! -d "venv" ]; then echo "Error: venv not created!" && exit 1; fi  # Check if venv was created
-                . venv/bin/activate  # Activate virtual environment
-                pip install --upgrade pip
-                pip install -r requirements.txt
-                '''
-            }
-        }
-
-        stage('Package Artifact') {
-            steps {                
-                sh 'tar -czf app.tar.gz app/main.py requirements.txt venv' // Package Python app and virtual environment
-            }
-        }
-
-        stage('Upload to Repository') {
-            steps {
-                withCredentials([string(credentialsId: 'jenkinsJobAppTask_cred', variable: 'Secret')]) {
-                    sh '''
-                    # Ensure SSH directory and correct permissions
-                    mkdir -p /var/jenkins_home/.ssh
-                    chmod 700 /var/jenkins_home/.ssh
-                    chmod 600 /var/jenkins_home/.ssh/id_rsa
-
-                    # Configure Git user
-                    git config --global user.email "erezsh12@gmail.com"
-                    git config --global user.name "erezshamai"
-
-                    # Change GitHub remote to SSH
-                    git remote set-url origin git@github.com:erezshamai/JobAppTask.git
-
-                    # Create a new tag if it doesn’t exist
-                    TAG="v1.0.0"
-                    git tag -l "$TAG" | grep "$TAG" || git tag -a "$TAG" -m "Automated release $TAG"
-                    GIT_SSH_COMMAND="ssh -i /var/jenkins_home/.ssh/id_rsa -o StrictHostKeyChecking=no" git push origin "$TAG"
-
-                    # Create GitHub release
-                    RESPONSE=$(curl -X POST -H "Authorization: Bearer $Secret" \
-                    -H "Accept: application/vnd.github.v3+json" \
-                    -d '{
-                        "tag_name": "'$TAG'",
-                        "name": "'$TAG'",
-                        "body": "Automated release by Jenkins",
-                        "draft": false,
-                        "prerelease": false
-                    }' https://api.github.com/repos/erezshamai/JobAppTask/releases)
-
-                    # Extract the upload URL from the response
-                    UPLOAD_URL=$(echo "$RESPONSE" | jq -r ".upload_url" | sed "s/{?name,label}//")
-
-                    if [[ -z "$UPLOAD_URL" ]]; then
-                        echo "Failed to extract UPLOAD_URL. API response:"
-                        echo "$RESPONSE"
-                        exit 1
-                    fi
-
-                    # Upload `app.tar.gz` to the release
-                    curl -X POST -H "Authorization: Bearer $Secret" \
-                    -H "Content-Type: application/octet-stream" \
-                    --data-binary @app.tar.gz \
-                    "$UPLOAD_URL?name=app.tar.gz"
-                    '''
+                echo 'Building Docker image...'
+                // Change the directory to the project root
+                dir('.') {
+                    // Execute the docker build command, specifying the location of the Dockerfile
+                    sh "docker build -t ${IMAGE_NAME}:latest -f docker/web/Dockerfile ."
                 }
             }
         }
-
     }
 }
-
