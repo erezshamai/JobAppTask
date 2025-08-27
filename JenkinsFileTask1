@@ -12,7 +12,7 @@ pipeline {
             steps {
                 script {
                     def scmVars = checkout([$class: 'GitSCM',
-                        branches: [[name: '*/main']], 
+                        branches: [[name: '*/aviram']], 
                         userRemoteConfigs: [[url: 'https://github.com/erezshamai/JobAppTask.git']]])
                     prepareEnv(scmVars)
                 }
