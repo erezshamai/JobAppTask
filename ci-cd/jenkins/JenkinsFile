@@ -3,7 +3,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_CREDENTIALS = credentials('my-dockerhub-credentials-id') // ID of the credentials you set up in Jenkins
+        DOCKER_HUB_CREDENTIALS = 'my-dockerhub-credentials-id' // ID of the credentials you set up in Jenkins
         IMAGE_NAME = 'erezshamai707/my-web-app'
     }
 
