@@ -25,6 +25,21 @@ pipeline {
                 }
             }
         }
+
+        stage('Push Docker Image') {
+            steps {
+                echo 'Logging in to Docker Hub...'
+                // This step uses the credentials ID defined in the environment block.
+                // It securely provides the username and password to the 'docker login' command.
+                withCredentials([usernamePassword(credentialsId: DOCKER_HUB_CREDENTIALS, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin"
+
+                echo 'Pushing Docker image to Docker Hub...'
+                // Pushes the image with the 'latest' tag.
+                // You can also add more complex tagging strategies here.
+                sh "docker push ${IMAGE_NAME}:latest"
+            }
+        }        
         
         stage('Run and Test Container') {
             steps {
