@@ -39,6 +39,7 @@ pipeline {
                 // Pushes the image with the 'latest' tag.
                 // You can also add more complex tagging strategies here.
                 sh "docker push ${IMAGE_NAME}:latest"
+                }
             }
         }
 
