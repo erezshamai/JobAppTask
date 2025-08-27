@@ -1,0 +1,35 @@
+
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_HUB_CREDENTIALS = credentials('my-dockerhub-credentials-id') // ID of the credentials you set up in Jenkins
+        IMAGE_NAME = 'yerezshamai707/my-web-app'
+    }
+
+    stages {
+        stage('SCM Checkout') {
+            steps {
+                script {
+                    def scmVars = checkout([$class: 'GitSCM',
+                        branches: [[name: '*/main']], 
+                        userRemoteConfigs: [[url: 'https://github.com/erezshamai/JobAppTask.git']]])
+                    prepareEnv(scmVars)
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                echo 'Building Docker image...'
+                // Assumes a 'Dockerfile' is in the root of the repository.
+                // The '. .' at the end specifies the Docker build context.
+                sh "docker build -t ${IMAGE_NAME}:latest ."
+            }
+        }
+
+
+
+    }
+}
+
