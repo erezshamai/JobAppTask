@@ -1,11 +1,11 @@
 pipeline {
     agent any
-
+    
     environment {
         DOCKER_HUB_CREDENTIALS = credentials('my-dockerhub-credentials-id')
         IMAGE_NAME = 'erezshamai707/my-web-app'
     }
-
+    
     stages {
         stage('SCM Checkout') {
             steps {
@@ -16,14 +16,48 @@ pipeline {
                 }
             }
         }
-
+        
         stage('Build Docker Image') {
             steps {
                 echo 'Building Docker image...'
-                // Change the directory to the project root
                 dir('.') {
-                    // Execute the docker build command, specifying the location of the Dockerfile
                     sh "docker build -t ${IMAGE_NAME}:latest -f docker/web/Dockerfile ."
+                }
+            }
+        }
+        
+        stage('Run and Test Container') {
+            steps {
+                echo 'Running a container to test the application logic...'
+                script {
+                    def containerId
+                    try {
+                        // Start the container in detached mode (-d) and get its ID
+                        containerId = sh(returnStdout: true, script: "docker run -d ${IMAGE_NAME}:latest").trim()
+                        echo "Started container with ID: ${containerId}"
+
+                        // Wait for a few seconds to let the application start
+                        sleep 10
+
+                        // Check the container logs for expected output
+                        // You can customize this to look for specific success messages
+                        def logs = sh(returnStdout: true, script: "docker logs ${containerId}")
+                        if (logs.contains("Application started successfully")) {
+                            echo "✅ Application logic seems to be working. Logs contain the expected message."
+                        } else {
+                            echo "Application logic test failed. Unexpected logs:"
+                            echo logs
+                            currentBuild.result = 'FAILURE'
+                            error 'Application test failed.'
+                        }
+                    } finally {
+                        // Ensure the container is always stopped and removed
+                        if (containerId) {
+                            sh "docker stop ${containerId}"
+                            sh "docker rm ${containerId}"
+                            echo "Container ${containerId} stopped and removed."
+                        }
+                    }
                 }
             }
         }
