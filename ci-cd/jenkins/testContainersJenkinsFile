@@ -56,9 +56,9 @@ pipeline {
                         
                         // Check if the response is a list and contains at least one item
                         if (json instanceof List && json.size() > 0) {
-                            echo "Response body has ${json.size()} running containers, as expected. Test passed! ✅"
+                            echo "Response body has ${json.size()} running containers, as expected. Test passed!"
                         } else {
-                            error "Response body does not contain a list of running containers or is empty. Test failed! ❌"
+                            error "Response body does not contain a list of running containers or is empty. Test failed!"
                         }
                     } catch (Exception e) {
                         error "An error occurred during the test: ${e.message}"
