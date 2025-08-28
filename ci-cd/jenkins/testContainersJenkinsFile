@@ -43,12 +43,12 @@ pipeline {
                         //sh 'docker run -d --rm --name nginx --network my-cotainerTest-network -p 80:80 erezshamai707/my-nginx:latest'
                         
                         // 2. Wait for services to be ready
-                        echo 'Waiting 10 seconds for containers to be up and running...'
+                        echo 'Waiting 15 seconds for containers to be up and running...'
 
-                        sleep 10
+                        sleep 15
                         
                         // 3. Initiate the HTTP request
-                        def response = httpRequest(url: 'http://localhost/running-containers', consoleLogResponseBody: true)
+                        def response = httpRequest(url: 'http://nginx/running-containers', consoleLogResponseBody: true)
                         // Print the HTTP response content to the console
                         echo "HTTP Response Content: ${response.content}"                        
                         // 4. Validate the JSON response
@@ -71,11 +71,11 @@ pipeline {
                             sh "docker stop ${webContainerId} || true"
                         }
                         //sh 'docker network rm my-cotainerTest-network || true'
-                }
+                    }
+                 }
             }
         }
-    }
-    }
+    
     // Post-build actions, e.g., cleanup .
     post {
         always {
