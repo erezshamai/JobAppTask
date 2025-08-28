@@ -8,19 +8,10 @@ pipeline {
         
     }
 
-    stages {
-        stage('SCM Checkout') {
-            steps {
-                script {
-                    def scmVars = checkout([$class: 'GitSCM',
-                        branches: [[name: '*/aviram']], 
-                        userRemoteConfigs: [[url: 'https://github.com/erezshamai/JobAppTask.git']]])
-                }
-            }
-        }
 
 
-        stage('Log Into Docker Hob') {
+
+        stage('Log Into Docker Hub') {
             steps {
                 echo 'Logging in to Docker Hub...'
                 // This step uses the credentials ID defined in the environment block.
@@ -55,9 +46,9 @@ pipeline {
                         
                         // Check if the response is a list and contains at least one item
                         if (json.running_containers instanceof List && json.running_containers.size() > 0) {
-                            echo "Response body has ${json.size()} running containers, as expected. Test passed!"
+                            echo "Response body has ${json.running_containers.size()}  containers, as expected. Test passed!"
                         } else {
-                            error "Response body does not contain a list of running containers or is empty. Test failed!"
+                            error "Response body does not contain a list of  containers or is empty. Test failed!"
                         }
                     } catch (Exception e) {
                         error "An error occurred during the test: ${e.message}"
