@@ -38,12 +38,14 @@ pipeline {
                         // 1. Run all Docker containers on a shared network
                         sh 'docker network create --driver bridge my-cotainerTest-network || true'  
                         webContainerId = sh(returnStdout: true, script: "docker run -d --rm --name web --network my-cotainerTest-network erezshamai707/my-web-app:latest").trim()                  
+                        echo 'Waiting 15 seconds for web name container befor starting nginx ...'
+                        sleep 15
                         nginxContainerId = sh(returnStdout: true, script: "docker run -d --rm --name nginx --network my-cotainerTest-network -p 80:80 erezshamai707/my-nginx:latest").trim() 
                         //sh 'docker run -d --rm --name web --network my-cotainerTest-network erezshamai707/my-web-app:latest'
                         //sh 'docker run -d --rm --name nginx --network my-cotainerTest-network -p 80:80 erezshamai707/my-nginx:latest'
                         
                         // 2. Wait for services to be ready
-                        echo 'Waiting 15 seconds for containers to be up and running...'
+                        echo 'Waiting 15 seconds for nginx containers to be up and running...'
 
                         sleep 15
                         
