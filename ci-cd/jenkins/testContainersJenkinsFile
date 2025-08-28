@@ -24,22 +24,22 @@ pipeline {
                 script {
                     def webContainerId , nginxContainerId
                     try{
-                        // 1. Run all Docker containers on a shared network
+                        // Run all Docker containers on a shared network
                         sh 'docker network create --driver bridge my-cotainerTest-network || true'  
                         webContainerId = sh(returnStdout: true, script: "docker run -d --rm --name web -e DOCKER_HOST=tcp://host.docker.internal:2375 --network my-cotainerTest-network erezshamai707/my-web-app:latest").trim()                  
                         nginxContainerId = sh(returnStdout: true, script: "docker run -d --rm  --name nginx --network my-cotainerTest-network -p 80:80 erezshamai707/my-nginx:latest").trim() 
                         
                         
-                        // 2. Wait for services to be ready
+                        // Wait for containers to be ready
                         echo 'Waiting 15 seconds for containers to be up and running...'
 
                         sleep 15
                         
-                        // 3. Initiate the HTTP request
+                        // Initiate the HTTP request
                         def response = httpRequest(url: 'http://nginx/running-containers', consoleLogResponseBody: true)
                         // Print the HTTP response content to the console
                         echo "HTTP Response Content: ${response.content}"                        
-                        // 4. Validate the JSON response
+                        // Validate the JSON response
                         def json = new groovy.json.JsonSlurper().parseText(response.content)
                         
                         // Check if the response is a list and contains at least one item
@@ -51,7 +51,7 @@ pipeline {
                     } catch (Exception e) {
                         error "An error occurred during the test: ${e.message}"
                     } finally {
-                        // 5. Clean up: Stop and remove containers and network
+                        // Clean up: Stop and remove containers and network
                         if (nginxContainerId) {
                             sh "docker stop ${nginxContainerId} || true"
                         }
