@@ -44,5 +44,14 @@ pipeline {
         }
 
     }
+    // Post-build actions, e.g., cleanup .
+    post {
+        always {
+            echo 'Pipeline finished. Cleaning up workspace...'
+            // Clean up the workspace to free up disk space.            
+            sh "docker logout"
+            cleanWs()
+        }
+    }    
 }
 
