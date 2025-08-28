@@ -8,15 +8,6 @@ pipeline {
     }
 
     stages {
-        stage('SCM Checkout') {
-            steps {
-                script {
-                    checkout([$class: 'GitSCM',
-                        branches: [[name: '*/aviram']], 
-                        userRemoteConfigs: [[url: 'https://github.com/erezshamai/JobAppTask.git']]])                   
-                }
-            }
-        }
 
         stage('Build Docker Image') {
             steps {
