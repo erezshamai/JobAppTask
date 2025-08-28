@@ -39,8 +39,7 @@ pipeline {
                         sh 'docker network create --driver bridge my-cotainerTest-network || true'  
                         webContainerId = sh(returnStdout: true, script: "docker run -d --rm --name web -e DOCKER_HOST=tcp://host.docker.internal:2375 --network my-cotainerTest-network erezshamai707/my-web-app:latest").trim()                  
                         nginxContainerId = sh(returnStdout: true, script: "docker run -d --rm  --name nginx --network my-cotainerTest-network -p 80:80 erezshamai707/my-nginx:latest").trim() 
-                        //sh 'docker run -d --rm --name web --network my-cotainerTest-network erezshamai707/my-web-app:latest'
-                        //sh 'docker run -d --rm --name nginx --network my-cotainerTest-network -p 80:80 erezshamai707/my-nginx:latest'
+                        
                         
                         // 2. Wait for services to be ready
                         echo 'Waiting 15 seconds for containers to be up and running...'
@@ -55,7 +54,7 @@ pipeline {
                         def json = new groovy.json.JsonSlurper().parseText(response.content)
                         
                         // Check if the response is a list and contains at least one item
-                        if (json instanceof List && json.size() > 0) {
+                        if (json.running_containers instanceof List && json.running_containers.size() > 0) {
                             echo "Response body has ${json.size()} running containers, as expected. Test passed!"
                         } else {
                             error "Response body does not contain a list of running containers or is empty. Test failed!"
