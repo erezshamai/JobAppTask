@@ -8,9 +8,7 @@ pipeline {
         
     }
 
-
-
-
+    stages {
         stage('Log Into Docker Hub') {
             steps {
                 echo 'Logging in to Docker Hub...'
