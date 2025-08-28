@@ -1,0 +1,72 @@
+
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_HUB_CREDENTIALS = 'my-dockerhub-credentials-id' // ID of the credentials you set up in Jenkins
+        IMAGE_NAME = 'erezshamai707/my-nginx'
+        
+    }
+
+    stages {
+        stage('SCM Checkout') {
+            steps {
+                script {
+                    def scmVars = checkout([$class: 'GitSCM',
+                        branches: [[name: '*/aviram']], 
+                        userRemoteConfigs: [[url: 'https://github.com/erezshamai/JobAppTask.git']]])
+                }
+            }
+        }
+
+
+        stage('Log Into Docker Hob') {
+            steps {
+                echo 'Logging in to Docker Hub...'
+                // This step uses the credentials ID defined in the environment block.
+                // It securely provides the username and password to the 'docker login' command.
+                withCredentials([usernamePassword(credentialsId: env.DOCKER_HUB_CREDENTIALS, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin"
+                }
+            }
+        }
+        stage('Run Docker Test') {
+            steps {
+                script {
+                    // 1. Run all Docker containers on a shared network
+                    sh 'docker network create --driver bridge my-cotainerTest-network || true'                    
+                    sh 'docker run -d --rm --name web --network my-cotainerTest-network erezshamai707/my-web-app:latest'
+                    sh 'docker run -d --rm --name nginx --network my-cotainerTest-network -p 80:80 erezshamai707/my-nginx:latest'
+                    
+                    // 2. Wait for services to be ready
+                    echo 'Waiting 20 seconds for containers to be up and running...'
+                    sleep 20
+                    
+                    // 3. Initiate the HTTP request
+                    def response = httpRequest(url: 'http://localhost/running-containers', consoleLogResponseBody: true)
+                    
+                    // 4. Validate the JSON response
+                    def json = new groovy.json.JsonSlurper().parseText(response.content)
+                    
+                    // Check if the response is a list and contains at least one item
+                    if (json instanceof List && json.size() > 0) {
+                        echo "Response body has ${json.size()} running containers, as expected. Test passed! ✅"
+                    } else {
+                        error "Response body does not contain a list of running containers or is empty. Test failed! ❌"
+                    }
+                }
+            }
+        }
+    }
+    
+    // Post-build actions, e.g., cleanup .
+    post {
+        always {
+            echo 'Pipeline finished. Cleaning up workspace...'
+            // Clean up the workspace to free up disk space.            
+            sh "docker logout"
+            cleanWs()
+        }
+    }    
+}
+
