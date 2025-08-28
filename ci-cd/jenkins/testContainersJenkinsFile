@@ -38,7 +38,7 @@ pipeline {
                         // 1. Run all Docker containers on a shared network
                         sh 'docker network create --driver bridge my-cotainerTest-network || true'  
                         webContainerId = sh(returnStdout: true, script: "docker run -d --rm --name web -e DOCKER_HOST=tcp://host.docker.internal:2375 --network my-cotainerTest-network erezshamai707/my-web-app:latest").trim()                  
-                        nginxContainerId = sh(returnStdout: true, script: "docker run -d  --name nginx --network my-cotainerTest-network -p 80:80 erezshamai707/my-nginx:latest").trim() 
+                        nginxContainerId = sh(returnStdout: true, script: "docker run -d --rm  --name nginx --network my-cotainerTest-network -p 80:80 erezshamai707/my-nginx:latest").trim() 
                         //sh 'docker run -d --rm --name web --network my-cotainerTest-network erezshamai707/my-web-app:latest'
                         //sh 'docker run -d --rm --name nginx --network my-cotainerTest-network -p 80:80 erezshamai707/my-nginx:latest'
                         
