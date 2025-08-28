@@ -4,28 +4,28 @@ pipeline {
 
     environment {
         DOCKER_HUB_CREDENTIALS = 'my-dockerhub-credentials-id' // ID of the credentials you set up in Jenkins
-        IMAGE_NAME = 'erezshamai707/my-web-app'
+        IMAGE_NAME = 'erezshamai707/my-nginx'
+        
     }
 
     stages {
         stage('SCM Checkout') {
             steps {
                 script {
-                    checkout([$class: 'GitSCM',
+                    def scmVars = checkout([$class: 'GitSCM',
                         branches: [[name: '*/aviram']], 
-                        userRemoteConfigs: [[url: 'https://github.com/erezshamai/JobAppTask.git']]])                   
+                        userRemoteConfigs: [[url: 'https://github.com/erezshamai/JobAppTask.git']]])
                 }
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                echo 'Building Docker image...'
-                
-                sh "docker build -t ${IMAGE_NAME}:latest -f docker/web/Dockerfile ."
+                echo 'Building Docker image...'                
+                // The '. .' at the end specifies the Docker build context.
+                sh "docker build -t ${IMAGE_NAME}:latest -f docker/nginx/Dockerfile ."
             }
         }
-
 
         stage('Push Docker Image') {
             steps {
@@ -37,7 +37,7 @@ pipeline {
                 }
 
                 echo 'Pushing Docker image to Docker Hub...'
-                // Pushes the image with the 'latest' tag.                
+                // Pushes the image with the 'latest' tag.
                 sh "docker push ${env.IMAGE_NAME}:latest"
                 
             }
