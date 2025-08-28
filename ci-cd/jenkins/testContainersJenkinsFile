@@ -75,6 +75,7 @@ pipeline {
                  }
             }
         }
+    }
     
     // Post-build actions, e.g., cleanup .
     post {
