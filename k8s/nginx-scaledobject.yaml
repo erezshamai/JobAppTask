@@ -1,0 +1,14 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: nginx-scaledobject
+spec:
+  scaleTargetRef:
+    name: nginx-deployment  # References your deployment
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  triggers:
+  - type: cpu
+    metadata:
+      type: Utilization  # Scale based on CPU utilization
+      value: "50"  # Scale when CPU > 50%

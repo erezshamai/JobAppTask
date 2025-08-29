@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        resources:  # Add resource requests and limits
+          requests:
+            cpu: "100m"  # Request 100 milliCPU (0.1 CPU)
+            memory: "128Mi"
+          limits:
+            cpu: "1000m"  # Limit to 500 milliCPU (0.5 CPU)
+            memory: "512Mi"
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: nginx-volume
+      volumes:
+      - name: nginx-volume
+        persistentVolumeClaim:
+          claimName: nginx-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  selector:
+    app: nginx
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: LoadBalancer
