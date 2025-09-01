@@ -19,10 +19,10 @@ spec:
         - containerPort: 80
         resources:  # Add resource requests and limits
           requests:
-            cpu: "100m"  # Request 100 milliCPU (0.1 CPU)
+            cpu: "100m"  # Request 100 milliCPU 
             memory: "128Mi"
           limits:
-            cpu: "1000m"  # Limit to 500 milliCPU (0.5 CPU)
+            cpu: "1000m"  # Limit to 1000 milliCPU 
             memory: "512Mi"
         volumeMounts:
         - mountPath: /usr/share/nginx/html

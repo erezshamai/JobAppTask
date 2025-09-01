@@ -6,9 +6,11 @@ spec:
   scaleTargetRef:
     name: nginx-deployment  # References your deployment
   minReplicaCount: 1
-  maxReplicaCount: 5
+  maxReplicaCount: 3
+  pollingInterval: 10  # Check every 10 seconds
+  cooldownPeriod: 30  
   triggers:
   - type: cpu
     metadata:
       type: Utilization  # Scale based on CPU utilization
-      value: "50"  # Scale when CPU > 50%
+      value: "30"  # Scale when CPU > 30%

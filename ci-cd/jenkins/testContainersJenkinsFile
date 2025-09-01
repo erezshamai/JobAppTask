@@ -37,7 +37,12 @@ pipeline {
                         
                         // Initiate the HTTP request
                         def response = httpRequest(url: 'http://nginx/running-containers', consoleLogResponseBody: true)   
-                     
+
+                        echo "HTTP Response Headers:"
+                        response.headers.each { header ->
+                            echo "${header.key}: ${header.value}"
+                        }  
+                                           
                         // Print the HTTP response content to the console
                         echo "HTTP Response Content: ${response.content}"                        
                         // Validate the JSON response
