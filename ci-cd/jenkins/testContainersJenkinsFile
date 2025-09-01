@@ -44,8 +44,8 @@ pipeline {
                             echo "${header.key}: ${header.value}"
                         }  
 
-                        // Parse the response body as JSON
-                        def json = readJSON text: response.content                        
+                        // Validate the JSON response
+                        def json = new groovy.json.JsonSlurper().parseText(response.content)
                         
                         // Check if the response is a list and contains at least one item
                         if (json.running_containers instanceof List && json.running_containers.size() > 0) {
