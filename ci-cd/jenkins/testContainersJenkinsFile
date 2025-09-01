@@ -44,6 +44,8 @@ pipeline {
                             echo "${header.key}: ${header.value}"
                         }  
 
+                        // Parse the response body as JSON
+                        def json = readJSON text: response.content                        
                         
                         // Check if the response is a list and contains at least one item
                         if (json.running_containers instanceof List && json.running_containers.size() > 0) {
