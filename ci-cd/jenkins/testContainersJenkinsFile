@@ -37,8 +37,9 @@ pipeline {
                         
                         // Initiate the HTTP request
                         def response = httpRequest(url: 'http://nginx/running-containers', consoleLogResponseBody: true)   
-
+                        
                         echo "HTTP Response Headers:"
+                        // Print all response headers
                         response.headers.each { header ->
                             echo "${header.key}: ${header.value}"
                         }  
@@ -53,11 +54,13 @@ pipeline {
                     } catch (Exception e) {
                         error "An error occurred during the test: ${e.message}"
                     } finally {
+                        /******START for debugging purpose only - uncomment if needed ******
                         echo 'print  web docker logs for debugging purpose'
                         sh "docker logs ${webContainerId}"
 
                         echo 'print  nginx docker logs for debugging purpose'
-                        sh "docker logs ${nginxContainerId}"
+                        sh "docker logs ${nginxContainerId}" 
+                        END for debugging purpose only********************************/
 
                         // Clean up: Stop and remove containers and network
                          if (nginxContainerId) {
