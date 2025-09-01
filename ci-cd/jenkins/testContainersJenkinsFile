@@ -57,15 +57,16 @@ pipeline {
                     } catch (Exception e) {
                         error "An error occurred during the test: ${e.message}"
                     } finally {
+                        sh "docker logs ${webContainerId}"
                         // Clean up: Stop and remove containers and network
-                        /** if (nginxContainerId) {
+                         if (nginxContainerId) {
                             sh "docker stop ${nginxContainerId} || true"
                         }
                         if (webContainerId) {
                             sh "docker stop ${webContainerId} || true"
                         }
                         //sh 'docker network rm my-cotainerTest-network || true'
-                        **/
+                        
                     }
                  }
             }
