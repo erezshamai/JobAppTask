@@ -26,7 +26,7 @@ def get_running_containers():
         return response
     except docker.errors.DockerException as e:
         response = jsonify({'error': str(e)})
-        # Optionally add the header to error responses too
+        # add the header to error responses also
         x_forwarded_for = request.headers.get('X-Forwarded-For', '')
         if x_forwarded_for:
             response.headers['X-Forwarded-For'] = x_forwarded_for
