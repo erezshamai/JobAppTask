@@ -37,12 +37,7 @@ pipeline {
                         
                         // Initiate the HTTP request
                         def response = httpRequest(url: 'http://nginx/running-containers', consoleLogResponseBody: true)   
-
-                        // Print the HTTP response headers
-                        echo "HTTP Response Headers:"
-                        response.headers.each { header ->
-                            echo "${header.key}: ${header.value}"
-                        }                        
+                     
                         // Print the HTTP response content to the console
                         echo "HTTP Response Content: ${response.content}"                        
                         // Validate the JSON response
@@ -57,7 +52,12 @@ pipeline {
                     } catch (Exception e) {
                         error "An error occurred during the test: ${e.message}"
                     } finally {
+                        echo 'print  web docker logs for debugging purpose'
                         sh "docker logs ${webContainerId}"
+
+                        echo 'print  nginx docker logs for debugging purpose'
+                        sh "docker logs ${nginxContainerId}"
+
                         // Clean up: Stop and remove containers and network
                          if (nginxContainerId) {
                             sh "docker stop ${nginxContainerId} || true"
