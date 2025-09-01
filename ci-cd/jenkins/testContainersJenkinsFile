@@ -42,7 +42,7 @@ pipeline {
                         response.headers.each { header ->
                             echo "${header.key}: ${header.value}"
                         }  
-                                           
+
                         // Print the HTTP response content to the console
                         echo "HTTP Response Content: ${response.content}"                        
                         // Validate the JSON response
@@ -65,10 +65,10 @@ pipeline {
 
                         // Clean up: Stop and remove containers and network
                          if (nginxContainerId) {
-                            sh "docker stop ${nginxContainerId} || true"
+                            //sh "docker stop ${nginxContainerId} || true"
                         }
                         if (webContainerId) {
-                            sh "docker stop ${webContainerId} || true"
+                            //sh "docker stop ${webContainerId} || true"
                         }
                         //sh 'docker network rm my-cotainerTest-network || true'
                         
