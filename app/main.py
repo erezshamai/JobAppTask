@@ -2,6 +2,7 @@ import logging
 import redis
 from flask import Flask, request
 
+
 app = Flask(__name__)
 
 # Configure logging
