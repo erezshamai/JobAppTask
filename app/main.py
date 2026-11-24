@@ -2,7 +2,7 @@ import logging
 import redis
 from flask import Flask, request
 
-#git push test
+#git push test2
 app = Flask(__name__)
 
 # Configure logging
